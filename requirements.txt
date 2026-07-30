@@ -1,0 +1,6 @@
+# BrowserAgent dependencies
+qwen-agent>=0.0.34
+playwright>=1.61.0
+streamlit>=1.30.0
+python-dotenv>=1.0.0
+httpx>=0.25.0
