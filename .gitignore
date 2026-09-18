@@ -28,3 +28,6 @@ Thumbs.db
 
 # Playwright
 ms-playwright/
+
+# Local feature worktrees
+.worktrees/
