@@ -30,6 +30,11 @@ class Config:
     # 智能体最大步数
     MAX_STEPS: int = int(os.getenv('MAX_STEPS', '15'))
 
+    # 连续无效模型调用、无进展操作及单任务执行时间限制
+    MAX_INVALID_CALLS: int = int(os.getenv('MAX_INVALID_CALLS', '3'))
+    MAX_NO_PROGRESS: int = int(os.getenv('MAX_NO_PROGRESS', '3'))
+    TASK_TIMEOUT_SECONDS: int = int(os.getenv('TASK_TIMEOUT_SECONDS', '180'))
+
     # 截图保存目录
     SCREENSHOT_DIR: str = os.getenv('SCREENSHOT_DIR',
                                      os.path.join(os.path.dirname(__file__), '..', '..', 'screenshots'))
