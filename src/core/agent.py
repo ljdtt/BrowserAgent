@@ -524,6 +524,7 @@ class BrowserAgent:
         task: str,
         verifier: Callable[[Observation | None, str], VerificationResult] | None = None,
         on_event: Callable[[dict[str, Any]], None] | None = None,
+        cancel_event: Any | None = None,
     ) -> dict[str, Any]:
         started = time.perf_counter()
         steps = model_calls = invalid_calls = no_progress_count = 0
@@ -556,6 +557,12 @@ class BrowserAgent:
             emit("run_started", {"task": task})
 
             while steps < self.max_steps:
+                if cancel_event is not None and cancel_event.is_set():
+                    status = RunStatus.CANCELLED
+                    error_code = "cancelled"
+                    error_message = "task cancelled"
+                    emit("run_cancelled")
+                    break
                 if time.perf_counter() - started >= self.timeout_seconds:
                     status = RunStatus.TIMED_OUT
                     error_code = "task_timeout"

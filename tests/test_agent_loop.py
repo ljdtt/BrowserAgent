@@ -1,4 +1,5 @@
 import json
+import threading
 
 from src.core.agent import BrowserAgent
 from src.core.model_adapter import QwenModelAdapter
@@ -117,4 +118,16 @@ def test_agent_reports_max_steps_and_closes_browser():
 
     assert result["status"] == "max_steps_exceeded"
     assert result["steps"] == 2
+    assert browser.closed is True
+
+
+def test_agent_honors_a_preexisting_cancellation_request():
+    cancelled = threading.Event()
+    cancelled.set()
+    agent, browser = make_agent([])
+
+    result = agent.run("不要执行", cancel_event=cancelled)
+
+    assert result["status"] == "cancelled"
+    assert result["model_calls"] == 0
     assert browser.closed is True

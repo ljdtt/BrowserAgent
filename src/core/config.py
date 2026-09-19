@@ -43,6 +43,11 @@ class Config:
     LOG_DIR: str = os.getenv('LOG_DIR',
                              os.path.join(os.path.dirname(__file__), '..', '..', 'logs'))
 
+    # 每次运行的事件、结果和截图目录
+    ARTIFACT_DIR: str = os.getenv(
+        'ARTIFACT_DIR', os.path.join(os.path.dirname(__file__), '..', '..', 'artifacts')
+    )
+
     @classmethod
     def validate(cls):
         """检查必要配置是否就绪"""
