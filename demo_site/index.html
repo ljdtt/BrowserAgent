@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BrowserAgent 课程中心</title><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header><p class="eyebrow">DETERMINISTIC AGENT LAB</p><h1>课程中心</h1><p>用于浏览器智能体开发、演示与回归评测的本地站点。</p></header>
+  <main>
+    <section aria-labelledby="catalog-title">
+      <div class="section-heading"><div><p class="eyebrow">CATALOG</p><h2 id="catalog-title">课程目录</h2></div><span id="course-count"></span></div>
+      <div class="search-row"><input id="course-query" placeholder="输入课程关键词" aria-label="课程关键词"><button id="search-button" type="button">搜索课程</button><button id="reset-button" class="secondary" type="button">重置</button></div>
+      <div id="course-list" class="course-grid" aria-live="polite"></div>
+    </section>
+    <section aria-labelledby="signup-title">
+      <p class="eyebrow">ENROLLMENT</p><h2 id="signup-title">课程报名</h2>
+      <form id="signup-form"><label>姓名<input id="signup-name" placeholder="报名人姓名" required></label><label>邮箱<input id="signup-email" type="email" placeholder="联系邮箱" required></label><label>课程<select id="signup-course" aria-label="报名课程"></select></label><button type="submit">提交报名</button></form>
+      <div id="receipt" class="receipt" aria-live="polite" hidden></div>
+    </section>
+  </main><script src="app.js"></script>
+</body></html>

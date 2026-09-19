@@ -1,0 +1,9 @@
+:root { color-scheme: light; font-family: Inter, "Microsoft YaHei", sans-serif; color: #172033; background: #f3f5f8; }
+* { box-sizing: border-box; } body { margin: 0; }
+header { padding: 56px max(7vw, 24px) 40px; color: white; background: linear-gradient(125deg, #10264d, #315d92); } header h1 { margin: 4px 0; font-size: clamp(36px, 6vw, 68px); }
+main { width: min(1100px, 92vw); margin: 34px auto 80px; display: grid; gap: 28px; }
+section { padding: 28px; border: 1px solid #dbe1e9; border-radius: 18px; background: white; box-shadow: 0 16px 45px #24365312; }
+.section-heading { display: flex; align-items: end; justify-content: space-between; } .eyebrow { margin: 0 0 5px; color: #4775a7; font: 700 12px/1.2 monospace; letter-spacing: .12em; } h2 { margin: 0 0 20px; font-size: 28px; }
+.search-row, form { display: flex; flex-wrap: wrap; gap: 12px; } input, select, button { min-height: 44px; border-radius: 9px; border: 1px solid #bdc8d6; padding: 0 14px; font: inherit; } input { min-width: 240px; } button { color: white; background: #235ea5; border: 0; font-weight: 700; cursor: pointer; } button.secondary { color: #244267; background: #e7eef7; }
+.course-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); gap: 14px; } .course-card { padding: 18px; border: 1px solid #e1e6ed; border-radius: 12px; background: #fbfcfe; } .course-card h3 { margin: 8px 0; } .path { color: #68758a; font-family: monospace; }
+label { display: grid; gap: 6px; font-weight: 700; } .receipt { margin-top: 18px; padding: 16px; border-radius: 10px; color: #155c3b; background: #e6f7ed; font-weight: 700; }

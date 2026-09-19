@@ -22,6 +22,9 @@ screenshots/*.png
 # Logs
 logs/*.log
 
+# Run and evaluation artifacts
+artifacts/
+
 # OS
 .DS_Store
 Thumbs.db

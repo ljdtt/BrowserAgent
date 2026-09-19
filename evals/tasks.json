@@ -1,0 +1,17 @@
+[
+  {"id":"dev-python","split":"dev","kind":"course_lookup","task":"查找 Python 入门课程的时长和链接","script":{"query":"Python 入门"},"expected":{"name":"Python 入门","hours":18,"url":"/courses/python-intro"}},
+  {"id":"dev-playwright","split":"dev","kind":"course_lookup","task":"查找 Playwright 自动化课程","script":{"query":"Playwright"},"expected":{"name":"Playwright 自动化","hours":12,"url":"/courses/playwright"}},
+  {"id":"dev-react","split":"dev","kind":"course_lookup","task":"查找 React 实战课程","script":{"query":"React"},"expected":{"name":"React 实战","hours":24,"url":"/courses/react-practice"}},
+  {"id":"dev-form-python","split":"dev","kind":"form_submit","task":"为李雷报名 Python 入门","script":{"name":"李雷","email":"lilei@example.com","course":"Python 入门"},"expected":{"banner":"提交成功","name":"李雷","course":"Python 入门"}},
+  {"id":"dev-form-agent","split":"dev","kind":"form_submit","task":"为韩梅梅报名 Agent 工程实践","script":{"name":"韩梅梅","email":"han@example.com","course":"Agent 工程实践"},"expected":{"banner":"提交成功","name":"韩梅梅","course":"Agent 工程实践"}},
+  {"id":"dev-sql","split":"dev","kind":"course_lookup","task":"查找 SQL 入门课程","script":{"query":"SQL"},"expected":{"name":"SQL 入门","hours":10,"url":"/courses/sql-intro"}},
+  {"id":"holdout-data","split":"holdout","kind":"course_lookup","task":"查询数据分析基础课程信息","script":{"query":"数据分析"},"expected":{"name":"数据分析基础","hours":16,"url":"/courses/data-analysis"}},
+  {"id":"holdout-agent","split":"holdout","kind":"course_lookup","task":"查询 Agent 工程实践课程信息","script":{"query":"Agent"},"expected":{"name":"Agent 工程实践","hours":20,"url":"/courses/agent-engineering"}},
+  {"id":"holdout-browser","split":"holdout","kind":"course_lookup","task":"找浏览器自动化相关课程","script":{"query":"浏览器"},"expected":{"name":"Playwright 自动化","hours":12,"url":"/courses/playwright"}},
+  {"id":"holdout-frontend","split":"holdout","kind":"course_lookup","task":"找前端方向课程","script":{"query":"前端"},"expected":{"name":"React 实战","hours":24,"url":"/courses/react-practice"}},
+  {"id":"holdout-form-react","split":"holdout","kind":"form_submit","task":"为王芳报名 React 实战","script":{"name":"王芳","email":"wang@example.com","course":"React 实战"},"expected":{"banner":"提交成功","name":"王芳","course":"React 实战"}},
+  {"id":"holdout-form-sql","split":"holdout","kind":"form_submit","task":"为赵强报名 SQL 入门","script":{"name":"赵强","email":"zhao@example.com","course":"SQL 入门"},"expected":{"banner":"提交成功","name":"赵强","course":"SQL 入门"}},
+  {"id":"holdout-form-data","split":"holdout","kind":"form_submit","task":"为陈晨报名数据分析基础","script":{"name":"陈晨","email":"chen@example.com","course":"数据分析基础"},"expected":{"banner":"提交成功","name":"陈晨","course":"数据分析基础"}},
+  {"id":"holdout-form-browser","split":"holdout","kind":"form_submit","task":"为孙悦报名 Playwright 自动化","script":{"name":"孙悦","email":"sun@example.com","course":"Playwright 自动化"},"expected":{"banner":"提交成功","name":"孙悦","course":"Playwright 自动化"}},
+  {"id":"holdout-form-agent","split":"holdout","kind":"form_submit","task":"为周宁报名 Agent 工程实践","script":{"name":"周宁","email":"zhou@example.com","course":"Agent 工程实践"},"expected":{"banner":"提交成功","name":"周宁","course":"Agent 工程实践"}}
+]
