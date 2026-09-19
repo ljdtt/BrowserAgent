@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>课程目录</title></head>
+<body>
+  <h1>课程目录</h1>
+  <a href="#help">帮助</a>
+  <button id="noop" type="button">次要按钮</button>
+  <form id="search-form">
+    <label for="query">课程关键词</label>
+    <input id="query" name="query" placeholder="课程关键词">
+    <label for="level">难度</label>
+    <select id="level" name="level">
+      <option value="beginner">入门</option>
+      <option value="advanced">进阶</option>
+    </select>
+    <button type="submit">搜索</button>
+  </form>
+  <div id="result"></div>
+  <script>
+    document.querySelector('#search-form').addEventListener('submit', event => {
+      event.preventDefault();
+      const data = new FormData(event.currentTarget);
+      document.querySelector('#result').textContent =
+        `已搜索：${data.get('query')}；难度：${data.get('level')}`;
+    });
+  </script>
+</body>
+</html>
