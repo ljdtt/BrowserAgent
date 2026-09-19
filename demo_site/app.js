@@ -8,8 +8,14 @@ const courses = [
 ];
 const list = document.querySelector("#course-list"), count = document.querySelector("#course-count"), query = document.querySelector("#course-query"), select = document.querySelector("#signup-course");
 function render(items) {
-  list.innerHTML = items.map(course => `<article class="course-card"><p class="eyebrow">${course.tags}</p><h3>${course.name}</h3><p><strong>${course.hours} 小时</strong></p><p class="path">${course.path}</p></article>`).join("") || '<p class="empty">没有匹配的课程</p>';
+  list.innerHTML = items.map(course => `<article class="course-card"><p class="eyebrow">${course.tags}</p><h3>${course.name}</h3><p><strong>${course.hours} 小时</strong></p><p class="path">${course.path}</p><button type="button" data-course-path="${course.path}">查看 ${course.name}详情</button></article>`).join("") || '<p class="empty">没有匹配的课程</p>';
   count.textContent = `${items.length} 门课程`;
+  list.querySelectorAll('[data-course-path]').forEach(button => button.addEventListener('click', () => {
+    const course = courses.find(item => item.path === button.dataset.coursePath);
+    const detail = document.querySelector('#course-detail');
+    detail.hidden = false;
+    detail.innerHTML = `<p class="eyebrow">COURSE DETAIL</p><h3>课程详情</h3><p>课程：${course.name}</p><p>时长：${course.hours} 小时</p><p>链接：${course.path}</p>`;
+  }));
 }
 courses.forEach(course => select.add(new Option(course.name, course.name))); render(courses);
 document.querySelector("#search-button").addEventListener("click", () => { const keyword = query.value.trim().toLowerCase(); render(courses.filter(course => `${course.name} ${course.tags}`.toLowerCase().includes(keyword))); });

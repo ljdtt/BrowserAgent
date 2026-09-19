@@ -41,3 +41,17 @@ def test_task_verifier_checks_observed_evidence_and_reported_result():
 
     assert result.status.value == "passed"
     assert result.evidence["task_id"] == "lookup-python"
+
+
+def test_reported_result_cannot_replace_missing_page_evidence():
+    task = {
+        "id": "lookup-python",
+        "kind": "course_lookup",
+        "expected": {"name": "Python 入门", "hours": 18, "url": "/courses/python-intro"},
+    }
+    observation = Observation(snapshot_id="s1", url="http://demo.test/", text="错误页面")
+
+    result = verify_task(task, observation, "Python 入门 18 小时 /courses/python-intro")
+
+    assert result.status.value == "failed"
+    assert set(result.evidence["missing_page_evidence"]) == {"name", "hours", "url"}

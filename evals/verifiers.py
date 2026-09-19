@@ -27,12 +27,22 @@ def verify_task(task: dict[str, Any], observation: Observation | None,
         return VerificationResult(status="failed", reason="没有最终页面观察",
                                   evidence={"task_id": task["id"]})
     expected = task["expected"]
-    combined = f"{observation.text}\n{reported_result or ''}"
-    missing = []
+    page_text = observation.text
+    report_text = reported_result or ""
+    missing_page = []
+    missing_report = []
+    report_keys = {"name", "hours"} if task["kind"] == "course_lookup" else {"banner", "name", "course"}
     for key, value in expected.items():
         rendered = f"{value} 小时" if key == "hours" else str(value)
-        if rendered not in combined:
-            missing.append(key)
-    return VerificationResult(status="passed" if not missing else "failed",
-                              reason="页面证据与报告匹配" if not missing else f"缺少证据：{', '.join(missing)}",
-                              evidence={"task_id": task["id"], "expected": expected, "missing": missing})
+        if rendered not in page_text:
+            missing_page.append(key)
+        if key in report_keys and rendered not in report_text:
+            missing_report.append(key)
+    passed = not missing_page and not missing_report
+    reason = "页面证据与报告分别匹配" if passed else (
+        f"页面缺少：{', '.join(missing_page) or '无'}；报告缺少：{', '.join(missing_report) or '无'}"
+    )
+    return VerificationResult(status="passed" if passed else "failed", reason=reason,
+                              evidence={"task_id": task["id"], "expected": expected,
+                                        "missing_page_evidence": missing_page,
+                                        "missing_report_evidence": missing_report})

@@ -7,6 +7,10 @@ _sys.path.insert(0, _os.path.join(_os.path.dirname(__file__), ".."))
 import streamlit as st
 from core.agent import BrowserAgent
 from core.config import Config
+from app.dashboard import render as _render_dashboard
+
+_render_dashboard()
+st.stop()
 
 # 页面配置
 st.set_page_config(page_title="BrowserAgent", page_icon="🌐", layout="wide")

@@ -42,6 +42,13 @@ def test_local_demo_filters_course_catalog(demo_controller):
     assert "Python 入门" in result.observation.text
     assert "18 小时" in result.observation.text
     assert "1 门课程" in result.observation.text
+    detail = element(result.observation, text="查看 Python 入门详情")
+    result = demo_controller.execute(ToolCall(name="click", arguments={
+        "snapshot_id": result.observation.snapshot_id,
+        "element_id": detail.element_id,
+    }))
+    assert "课程详情" in result.observation.text
+    assert "/courses/python-intro" in result.observation.text
 
 
 def test_local_demo_creates_submission_receipt(demo_controller):

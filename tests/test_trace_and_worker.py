@@ -59,3 +59,20 @@ def test_worker_streams_events_and_cancels_cooperatively(tmp_path):
     assert result["status"] == "cancelled"
     assert worker.is_alive is False
     assert worker.trace_writer.result_path.exists()
+
+
+def test_worker_places_browser_screenshots_inside_the_run_trace(tmp_path):
+    received = {}
+
+    class ScreenshotAwareAgent:
+        def __init__(self, screenshot_dir):
+            received["screenshot_dir"] = screenshot_dir
+
+        def run(self, task, on_event=None, cancel_event=None):
+            return {"status": "completed", "events": [], "task": task}
+
+    worker = AgentWorker(agent_factory=ScreenshotAwareAgent, trace_base_dir=tmp_path)
+    worker.start("short task")
+    worker.join(timeout=1)
+
+    assert received["screenshot_dir"] == str(worker.trace_writer.screenshots_dir)

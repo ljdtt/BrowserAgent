@@ -57,8 +57,10 @@ def run_scripted_task(controller: BrowserController, task: dict[str, Any], base_
         observation = _execute(controller, observation, "fill", field, text=script["query"])
         button = _find(observation, text="搜索课程")
         observation = _execute(controller, observation, "click", button)
-        steps = 2
         expected = task["expected"]
+        detail = _find(observation, text=f"查看 {expected['name']}详情")
+        observation = _execute(controller, observation, "click", detail)
+        steps = 3
         reported = f"找到 {expected['name']}，时长 {expected['hours']} 小时，链接 {expected['url']}"
     else:
         for placeholder, value in (("报名人姓名", script["name"]), ("联系邮箱", script["email"])):

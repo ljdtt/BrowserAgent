@@ -492,6 +492,7 @@ class BrowserAgent:
         browser_type: str | None = None,
         headless: bool | None = None,
         max_steps: int | None = None,
+        screenshot_dir: str | None = None,
         *,
         model_adapter: QwenModelAdapter | None = None,
         browser: BrowserController | None = None,
@@ -510,7 +511,7 @@ class BrowserAgent:
         self.browser = browser or BrowserController(
             browser_type=browser_type or Config.BROWSER_TYPE,
             headless=Config.HEADLESS if headless is None else headless,
-            screenshot_dir=Config.SCREENSHOT_DIR,
+            screenshot_dir=screenshot_dir or Config.SCREENSHOT_DIR,
         )
         self.max_steps = Config.MAX_STEPS if max_steps is None else max_steps
         self.max_invalid_calls = Config.MAX_INVALID_CALLS if max_invalid_calls is None else max_invalid_calls
@@ -528,16 +529,30 @@ class BrowserAgent:
     ) -> dict[str, Any]:
         started = time.perf_counter()
         steps = model_calls = invalid_calls = no_progress_count = 0
-        previous_fingerprint: tuple[str, str] | None = None
+        previous_fingerprint: tuple[str, str, str, str] | None = None
         events: list[RunEvent] = []
         screenshots: list[str] = []
+        screenshots_allowed = True
+        sensitive_values: list[str] = []
         observation: Observation | None = None
         status = RunStatus.FAILED
         reported_result = verification_reason = error_code = error_message = None
         verification_status = VerificationStatus.NOT_CHECKED
 
+        def sanitize(value: Any) -> Any:
+            if isinstance(value, str):
+                for secret in sensitive_values:
+                    if secret:
+                        value = value.replace(secret, "[REDACTED]")
+                return value
+            if isinstance(value, dict):
+                return {key: sanitize(item) for key, item in value.items()}
+            if isinstance(value, list):
+                return [sanitize(item) for item in value]
+            return value
+
         def emit(kind: str, data: dict[str, Any] | None = None) -> None:
-            event = RunEvent(kind=kind, data=data or {})
+            event = RunEvent(kind=kind, data=sanitize(data or {}))
             events.append(event)
             self._log_step(kind, event.data)
             if on_event:
@@ -595,14 +610,19 @@ class BrowserAgent:
                     continue
 
                 invalid_calls = 0
-                emit("tool_requested", {"name": call.name, "arguments": call.arguments})
+                if call.name == "fill" and call.arguments.get("sensitive"):
+                    sensitive_values.append(call.arguments["text"])
+                public_arguments = dict(call.arguments)
+                if call.name == "fill" and public_arguments.get("sensitive"):
+                    public_arguments["text"] = "[REDACTED]"
+                emit("tool_requested", {"name": call.name, "arguments": public_arguments})
                 if call.name == "finish":
-                    reported_result = call.arguments["result"]
+                    reported_result = sanitize(call.arguments["result"])
                     status = RunStatus.COMPLETED
                     if verifier:
                         verification = verifier(observation, reported_result)
                         verification_status = verification.status
-                        verification_reason = verification.reason or None
+                        verification_reason = sanitize(verification.reason) or None
                         emit("verification_finished", verification.model_dump(mode="json"))
                     emit("run_finished", {"reported_result": reported_result})
                     break
@@ -611,12 +631,20 @@ class BrowserAgent:
                 steps += 1
                 if tool_result.observation is not None:
                     observation = tool_result.observation
-                screenshot_path = self.browser.screenshot(name=f"step_{steps:02d}")
+                if call.name == "fill" and call.arguments.get("sensitive"):
+                    screenshots_allowed = False
+                screenshot_path = None
+                if screenshots_allowed:
+                    screenshot_path = self.browser.screenshot(name=f"step_{steps:02d}")
                 if screenshot_path:
                     screenshots.append(screenshot_path)
                 emit("tool_finished", tool_result.model_dump(mode="json", exclude={"observation"}))
 
+                fingerprint_arguments = dict(public_arguments)
+                fingerprint_arguments.pop("snapshot_id", None)
                 fingerprint = (
+                    call.name,
+                    json.dumps(fingerprint_arguments, ensure_ascii=False, sort_keys=True),
                     observation.url if observation else "",
                     observation.text[:500] if observation else "",
                 )

@@ -78,3 +78,22 @@ def test_click_and_select_option_operate_on_fresh_snapshots(controller, demo_url
 
     assert clicked.ok is True
     assert "难度：advanced" in clicked.observation.text
+
+
+def test_observer_removes_ids_from_elements_that_become_hidden(controller, demo_url):
+    controller.navigate(demo_url)
+    controller.page.evaluate("""() => {
+        const old = document.querySelector('button');
+        old.style.display = 'none';
+        const fresh = document.createElement('button');
+        fresh.textContent = 'Fresh action';
+        document.body.appendChild(fresh);
+    }""")
+
+    current = controller.observe().observation
+    fresh = next(item for item in current.elements if item.text == "Fresh action")
+    result = controller.execute(ToolCall(name="click", arguments={
+        "snapshot_id": current.snapshot_id, "element_id": fresh.element_id,
+    }))
+
+    assert result.ok is True

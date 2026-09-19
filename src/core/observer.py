@@ -15,6 +15,9 @@ OBSERVE_SCRIPT = r"""
     '[role="textbox"]', '[role="searchbox"]', '[role="combobox"]'
   ].join(',');
   const output = [];
+  for (const element of document.querySelectorAll('[data-browser-agent-id]')) {
+    element.removeAttribute('data-browser-agent-id');
+  }
   for (const element of document.querySelectorAll(selector)) {
     const rect = element.getBoundingClientRect();
     const style = window.getComputedStyle(element);

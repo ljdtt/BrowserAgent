@@ -97,5 +97,52 @@ def main():
         run_interactive()
 
 
+def cli_main():
+    """Argument-based CLI supporting deterministic and live model runs."""
+    import argparse
+    import json
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser(description="BrowserAgent CLI")
+    parser.add_argument("task", nargs="?", help="自然语言浏览器任务")
+    parser.add_argument("--scripted", metavar="TASK_ID", help="运行 evals/tasks.json 中的确定性任务")
+    parser.add_argument("--json", action="store_true", help="仅输出 JSON")
+    parser.add_argument("--output-dir", default="artifacts", help="结果文件目录")
+    parser.add_argument("--headful", action="store_true", help="显示浏览器窗口")
+    args = parser.parse_args()
+
+    if args.scripted:
+        from evals.run import load_tasks, run_scripted_task
+        from core.browser_controller import BrowserController
+
+        task = next((item for item in load_tasks() if item["id"] == args.scripted), None)
+        if task is None:
+            parser.error(f"unknown scripted task: {args.scripted}")
+        base_url = (Path(__file__).parents[2] / "demo_site" / "index.html").resolve().as_uri()
+        controller = BrowserController(
+            headless=not args.headful,
+            browser_type=Config.BROWSER_TYPE,
+            screenshot_dir=str(Path(args.output_dir) / "screenshots"),
+        )
+        try:
+            result = run_scripted_task(controller, task, base_url)
+        finally:
+            controller.close()
+        output = Path(args.output_dir)
+        output.mkdir(parents=True, exist_ok=True)
+        (output / f"{task['id']}.json").write_text(
+            json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    else:
+        if not args.task:
+            parser.error("provide a task or --scripted TASK_ID")
+        result = BrowserAgent(headless=not args.headful).run(args.task)
+
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False))
+    else:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
 if __name__ == '__main__':
-    main()
+    cli_main()

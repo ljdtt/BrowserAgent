@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import queue
+import inspect
 import threading
 from pathlib import Path
 from typing import Any, Callable
 
 from .agent import BrowserAgent
 from .config import Config
-from .trace import TraceWriter
+from .trace import TraceWriter, redact_event
 
 
 class AgentWorker:
@@ -42,10 +43,16 @@ class AgentWorker:
 
     def _run(self, task: str, agent_options: dict[str, Any]) -> None:
         def handle_event(event: dict[str, Any]) -> None:
-            self.trace_writer.write_event(event)
-            self._events.put(event)
+            safe_event = redact_event(event)
+            self.trace_writer.write_event(safe_event)
+            self._events.put(safe_event)
 
         try:
+            parameters = inspect.signature(self.agent_factory).parameters
+            accepts_options = any(item.kind == inspect.Parameter.VAR_KEYWORD
+                                  for item in parameters.values())
+            if "screenshot_dir" in parameters or accepts_options:
+                agent_options.setdefault("screenshot_dir", str(self.trace_writer.screenshots_dir))
             agent = self.agent_factory(**agent_options)
             self._result = agent.run(
                 task,

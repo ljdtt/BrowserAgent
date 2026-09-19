@@ -131,3 +131,51 @@ def test_agent_honors_a_preexisting_cancellation_request():
     assert result["status"] == "cancelled"
     assert result["model_calls"] == 0
     assert browser.closed is True
+
+
+def test_sensitive_fill_is_not_exposed_or_screenshotted():
+    secret = "private-password"
+    agent, _browser = make_agent([
+        function_call("fill", {
+            "snapshot_id": "snap-1", "element_id": 0, "text": secret, "sensitive": True,
+        }),
+        function_call("finish", {"result": f"已填写 {secret}", "evidence": [secret]}),
+    ])
+
+    result = agent.run("填写密码")
+
+    assert secret not in json.dumps(result, ensure_ascii=False)
+    assert result["screenshots"] == []
+
+
+def test_different_actions_on_unchanged_page_are_progress():
+    agent, _browser = make_agent([
+        function_call("fill", {
+            "snapshot_id": "snap-1", "element_id": 0, "text": "李雷", "sensitive": False,
+        }),
+        function_call("fill", {
+            "snapshot_id": "snap-2", "element_id": 1, "text": "lilei@example.com", "sensitive": False,
+        }),
+        function_call("finish", {"result": "填写完成", "evidence": []}),
+    ], max_no_progress=1)
+
+    result = agent.run("填写两个字段")
+
+    assert result["status"] == "completed"
+    assert result["steps"] == 2
+
+
+def test_repeated_equivalent_actions_ignore_ephemeral_snapshot_ids():
+    agent, _browser = make_agent([
+        function_call("fill", {
+            "snapshot_id": "snap-1", "element_id": 0, "text": "same", "sensitive": False,
+        }),
+        function_call("fill", {
+            "snapshot_id": "snap-2", "element_id": 0, "text": "same", "sensitive": False,
+        }),
+    ], max_no_progress=1)
+
+    result = agent.run("重复填写")
+
+    assert result["status"] == "failed"
+    assert result["error_code"] == "no_progress"
