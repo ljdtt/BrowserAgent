@@ -48,6 +48,11 @@ class FakeBrowser:
         self.closed = True
 
 
+class EmptyErrorBrowser(FakeBrowser):
+    def start(self):
+        raise AssertionError()
+
+
 def make_agent(messages, browser=None, **options):
     browser = browser or FakeBrowser()
     adapter = QwenModelAdapter(model=ScriptedModel(messages))
@@ -179,3 +184,14 @@ def test_repeated_equivalent_actions_ignore_ephemeral_snapshot_ids():
 
     assert result["status"] == "failed"
     assert result["error_code"] == "no_progress"
+
+
+def test_empty_exception_still_produces_actionable_error_message():
+    browser = EmptyErrorBrowser()
+    agent, _browser = make_agent([], browser=browser)
+
+    result = agent.run("启动浏览器")
+
+    assert result["status"] == "failed"
+    assert result["error_message"] == "AssertionError (no message)"
+    assert result["events"][0]["data"]["exception_type"] == "AssertionError"

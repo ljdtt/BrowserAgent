@@ -23,6 +23,7 @@ from qwen_agent.llm.schema import Message
 
 from .browser_controller import BrowserController
 from .config import Config
+from .errors import describe_exception, exception_event
 
 
 # ── 系统提示词 ──────────────────────────────────────────────
@@ -668,8 +669,8 @@ class BrowserAgent:
         except Exception as exc:
             status = RunStatus.FAILED
             error_code = "agent_error"
-            error_message = str(exc)
-            emit("run_error", {"error": str(exc)})
+            error_message = describe_exception(exc)
+            emit("run_error", exception_event(exc))
         finally:
             self.browser.close()
 

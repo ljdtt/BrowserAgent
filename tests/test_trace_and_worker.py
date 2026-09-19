@@ -1,6 +1,8 @@
 import json
 import time
 
+from src.core.agent import BrowserAgent
+from src.core.model_adapter import QwenModelAdapter
 from src.core.schemas import RunEvent
 from src.core.trace import TraceWriter
 from src.core.worker import AgentWorker
@@ -76,3 +78,41 @@ def test_worker_places_browser_screenshots_inside_the_run_trace(tmp_path):
     worker.join(timeout=1)
 
     assert received["screenshot_dir"] == str(worker.trace_writer.screenshots_dir)
+
+
+def test_real_browser_can_start_inside_worker_thread(tmp_path):
+    class FinishModel:
+        def chat(self, **_kwargs):
+            return [{
+                "role": "assistant",
+                "content": "",
+                "function_call": {
+                    "name": "finish",
+                    "arguments": '{"result":"ready","evidence":[]}',
+                },
+            }]
+
+    def factory(**options):
+        return BrowserAgent(
+            model_adapter=QwenModelAdapter(model=FinishModel()),
+            browser_type="msedge",
+            **options,
+        )
+
+    worker = AgentWorker(agent_factory=factory, trace_base_dir=tmp_path)
+    worker.start("检查浏览器", headless=False)
+    result = worker.join(timeout=30)
+
+    assert result["status"] == "completed"
+
+
+def test_worker_preserves_type_for_an_empty_exception(tmp_path):
+    def broken_factory(**_options):
+        raise AssertionError()
+
+    worker = AgentWorker(agent_factory=broken_factory, trace_base_dir=tmp_path)
+    worker.start("broken")
+    result = worker.join(timeout=1)
+
+    assert result["error_message"] == "AssertionError (no message)"
+    assert worker.poll()[0]["data"]["exception_type"] == "AssertionError"

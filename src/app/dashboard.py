@@ -34,7 +34,8 @@ def render() -> None:
         api_key = st.text_input("DashScope API Key", type="password", value=Config.DASHSCOPE_API_KEY)
         model = st.selectbox("模型", ["qwen-plus", "qwen-max", "qwen-turbo"])
         max_steps = st.number_input("最大浏览器动作", 1, 50, Config.MAX_STEPS)
-        headless = st.checkbox("无头模式", value=Config.HEADLESS)
+        headless = st.checkbox("无头模式", value=True,
+                               help="默认启用，更适合 Streamlit 后台 Worker；取消勾选会显示浏览器窗口。")
         st.caption("API Key 只传给模型客户端，不写入运行轨迹。")
 
     st.title("BrowserAgent")

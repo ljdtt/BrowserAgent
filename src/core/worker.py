@@ -10,6 +10,7 @@ from typing import Any, Callable
 
 from .agent import BrowserAgent
 from .config import Config
+from .errors import describe_exception, exception_event
 from .trace import TraceWriter, redact_event
 
 
@@ -63,10 +64,10 @@ class AgentWorker:
             self._result = {
                 "status": "failed",
                 "error_code": "worker_error",
-                "error_message": str(exc),
+                "error_message": describe_exception(exc),
                 "events": [],
             }
-            handle_event({"kind": "worker_error", "data": {"error": str(exc)}})
+            handle_event({"kind": "worker_error", "data": exception_event(exc)})
         finally:
             self.trace_writer.write_result(self._result)
 
