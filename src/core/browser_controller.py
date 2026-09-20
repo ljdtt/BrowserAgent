@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import os
+import asyncio
+import sys
+import threading
 import time
 from datetime import datetime
 from typing import Callable
@@ -12,6 +15,9 @@ from playwright.sync_api import sync_playwright
 
 from .observer import PageObserver
 from .schemas import Observation, ToolCall, ToolResult
+
+
+_PLAYWRIGHT_START_LOCK = threading.Lock()
 
 
 class BrowserController:
@@ -47,7 +53,19 @@ class BrowserController:
     def start(self) -> None:
         if self._browser is not None:
             return
-        self._pw = sync_playwright().start()
+        with _PLAYWRIGHT_START_LOCK:
+            previous_policy = asyncio.get_event_loop_policy()
+            needs_proactor = (
+                sys.platform == "win32"
+                and isinstance(previous_policy, asyncio.WindowsSelectorEventLoopPolicy)
+            )
+            try:
+                if needs_proactor:
+                    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+                self._pw = sync_playwright().start()
+            finally:
+                if needs_proactor:
+                    asyncio.set_event_loop_policy(previous_policy)
         launch_options = {"headless": self.headless, "args": ["--no-sandbox", "--disable-gpu"]}
         if self.browser_type:
             launch_options["channel"] = self.browser_type

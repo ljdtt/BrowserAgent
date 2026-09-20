@@ -1,4 +1,6 @@
 from pathlib import Path
+import asyncio
+import sys
 
 import pytest
 
@@ -97,3 +99,20 @@ def test_observer_removes_ids_from_elements_that_become_hidden(controller, demo_
     }))
 
     assert result.ok is True
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows event-loop compatibility")
+def test_browser_starts_when_host_uses_selector_event_loop_policy(tmp_path):
+    previous_policy = asyncio.get_event_loop_policy()
+    browser = None
+    try:
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        browser = BrowserController(browser_type="msedge", headless=True, screenshot_dir=str(tmp_path))
+        browser.start()
+
+        assert browser.observe().ok is True
+        assert isinstance(asyncio.get_event_loop_policy(), asyncio.WindowsSelectorEventLoopPolicy)
+    finally:
+        if browser is not None:
+            browser.close()
+        asyncio.set_event_loop_policy(previous_policy)
