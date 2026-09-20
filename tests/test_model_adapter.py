@@ -13,7 +13,7 @@ def test_adapter_returns_last_assistant_message():
     model = FakeQwenModel([
         {"role": "assistant", "content": "draft"},
         {"role": "assistant", "content": "", "function_call": {
-            "name": "finish", "arguments": '{"result":"完成","evidence":[]}'
+            "name": "finish", "arguments": '{"success":true,"result":"完成","evidence":[]}'
         }},
     ])
 

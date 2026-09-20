@@ -60,6 +60,7 @@ class ExtractArguments(BaseModel):
 
 
 class FinishArguments(BaseModel):
+    success: bool
     result: str = Field(min_length=1)
     evidence: list[str] = Field(default_factory=list)
 
@@ -86,7 +87,7 @@ TOOL_DESCRIPTIONS = {
     "scroll": "向上或向下滚动页面。",
     "select_option": "选择下拉框选项。",
     "extract": "从当前页面提取指定字段。",
-    "finish": "声明任务执行结束，并返回结果和证据。",
+    "finish": "结束任务。任务确实完成时 success=true；因页面不可用或其他阻碍无法完成时 success=false，并说明原因。",
 }
 
 

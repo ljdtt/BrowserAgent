@@ -61,7 +61,7 @@ def make_agent(messages, browser=None, **options):
 
 def test_agent_marks_reported_finish_unverified():
     agent, browser = make_agent([
-        function_call("finish", {"result": "任务完成", "evidence": ["演示页面"]})
+        function_call("finish", {"success": True, "result": "任务完成", "evidence": ["演示页面"]})
     ])
 
     result = agent.run("检查演示页面")
@@ -69,6 +69,23 @@ def test_agent_marks_reported_finish_unverified():
     assert result["status"] == "completed"
     assert result["verification_status"] == "not_checked"
     assert result["reported_result"] == "任务完成"
+    assert browser.closed is True
+
+
+def test_agent_marks_model_reported_blocker_as_failed():
+    agent, browser = make_agent([
+        function_call("finish", {
+            "success": False,
+            "result": "连接被拒绝，任务无法继续",
+            "evidence": [],
+        })
+    ])
+
+    result = agent.run("访问不可用页面")
+
+    assert result["status"] == "failed"
+    assert result["error_code"] == "model_reported_failure"
+    assert result["reported_result"] == "连接被拒绝，任务无法继续"
     assert browser.closed is True
 
 
@@ -86,7 +103,7 @@ def test_agent_stops_after_repeated_invalid_model_calls():
 def test_agent_executes_tool_and_records_function_feedback():
     agent, browser = make_agent([
         function_call("navigate", {"url": "https://example.test/course"}),
-        function_call("finish", {"result": "已打开课程", "evidence": ["course"]}),
+        function_call("finish", {"success": True, "result": "已打开课程", "evidence": ["course"]}),
     ])
 
     result = agent.run("打开课程")
@@ -98,7 +115,7 @@ def test_agent_executes_tool_and_records_function_feedback():
 
 def test_agent_keeps_verifier_failure_separate_from_completion():
     agent, _browser = make_agent([
-        function_call("finish", {"result": "完成", "evidence": []})
+        function_call("finish", {"success": True, "result": "完成", "evidence": []})
     ])
 
     result = agent.run(
@@ -144,7 +161,7 @@ def test_sensitive_fill_is_not_exposed_or_screenshotted():
         function_call("fill", {
             "snapshot_id": "snap-1", "element_id": 0, "text": secret, "sensitive": True,
         }),
-        function_call("finish", {"result": f"已填写 {secret}", "evidence": [secret]}),
+        function_call("finish", {"success": True, "result": f"已填写 {secret}", "evidence": [secret]}),
     ])
 
     result = agent.run("填写密码")
@@ -161,7 +178,7 @@ def test_different_actions_on_unchanged_page_are_progress():
         function_call("fill", {
             "snapshot_id": "snap-2", "element_id": 1, "text": "lilei@example.com", "sensitive": False,
         }),
-        function_call("finish", {"result": "填写完成", "evidence": []}),
+        function_call("finish", {"success": True, "result": "填写完成", "evidence": []}),
     ], max_no_progress=1)
 
     result = agent.run("填写两个字段")

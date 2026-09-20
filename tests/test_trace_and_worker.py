@@ -88,7 +88,7 @@ def test_real_browser_can_start_inside_worker_thread(tmp_path):
                 "content": "",
                 "function_call": {
                     "name": "finish",
-                    "arguments": '{"result":"ready","evidence":[]}',
+                    "arguments": '{"success":true,"result":"ready","evidence":[]}',
                 },
             }]
 
